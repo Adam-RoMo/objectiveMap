@@ -1,12 +1,14 @@
 mod ui_components;
 
-use eframe::egui::{self, viewport, Vec2};
-use ui_components::TopPanel;
+use eframe::egui::{self, viewport, Color32, Vec2};
+use ui_components::{MovableCanvas, TopPanel, colors};
 // use objective_map_core::{guide, objective};
 
 
 struct ObjectiveApp {
     top_panel: TopPanel,
+    guide_canvas: MovableCanvas,
+    // frame_style: egui::Style,
     // guide: Guide,
 }
 
@@ -15,6 +17,8 @@ impl Default for ObjectiveApp {
         // let mut guide = 
         Self {
             top_panel: TopPanel::new("Mon Panel Top"),
+            guide_canvas: MovableCanvas::new(),
+            // frame_style: style,
         }
     }
 }
@@ -24,7 +28,7 @@ impl eframe::App for ObjectiveApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             self.top_panel.ui(ctx);
             egui::CentralPanel::default().show(ctx, |ui| {
-                ui.label("Contenu principal de l'application");
+                self.guide_canvas.ui(ui);
             });
         });
     }
