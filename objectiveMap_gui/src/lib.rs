@@ -1,5 +1,6 @@
 mod ui_components;
-use eframe::egui;
+
+use eframe::egui::{self, viewport, Vec2};
 use ui_components::TopPanel;
 // use objective_map_core::{guide, objective};
 
@@ -30,7 +31,10 @@ impl eframe::App for ObjectiveApp {
 }
 
 pub fn run_app() -> Result<(), eframe::Error> {
-    let options = eframe::NativeOptions::default();
+    let options = eframe::NativeOptions {
+        viewport: viewport::ViewportBuilder::with_inner_size(viewport::ViewportBuilder::default(), Vec2::new(1600.0, 1000.0)),
+        ..Default::default()
+    };
     eframe::run_native(
         "My ObjectiveMap App",
         options,
