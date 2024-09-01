@@ -1,0 +1,8 @@
+[package]
+name = "objective_map_gui"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+objective_map_core = { path = "../objectiveMap_core" }
+eframe = "0.28.1"
