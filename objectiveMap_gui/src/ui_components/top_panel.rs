@@ -1,26 +1,15 @@
-use crate::ui_components::PanelButton;
-use eframe::egui::{self, Color32};
-use crate::ui_components::colors;
-
-use super::PanelPopup;
+use eframe::egui::{self};
+// use crate::ui_components::colors;
 
 
 pub struct TopPanel {
     pub title: String,
-    guides_popup: PanelPopup,
-    guides_button: PanelButton,
-    objectifs_button: PanelButton,
-    variables_button: PanelButton
 }
 
 impl TopPanel {
     pub fn new(title: &str) -> Self {
         Self {
             title: title.to_string(),
-            guides_popup: PanelPopup::new("GuidesPopup", colors::PRIMARY_COLOR),
-            guides_button: PanelButton::new("GuidesButton", colors::PRIMARY_COLOR),
-            objectifs_button: PanelButton::new("ObjectifsButton", colors::PRIMARY_COLOR),
-            variables_button: PanelButton::new("VaraiblesButton", colors::PRIMARY_COLOR)
         }
     }
 
@@ -28,16 +17,26 @@ impl TopPanel {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label(&self.title);
-                self.guides_popup.ui(ui, ctx);
-                // if self.guides_button.ui(ui).clicked() {
-                //     println!("Guides");
-                // }
-                // if self.objectifs_button.ui(ui).clicked() {
-                //     println!("Objectifs");
-                // }
-                // if self.variables_button.ui(ui).clicked() {
-                //     println!("Variables");
-                // }
+                egui::menu::bar(ui, |ui| {
+                    ui.menu_button("Guides", |ui| {
+                        if ui.button("Nouveau guide").clicked() {
+                            println!("New Guide");
+                        }
+                        if ui.button("Importer un guide").clicked() {
+                            println!("Import a guide");
+                        }
+                        if ui.button("Exporter un guide").clicked() {
+                            println!("Export a guide");
+                        }
+                        // for guide in guides {}
+                    });
+                    if ui.button("Mes objectifs").clicked() {
+                        println!("Open objectifs panel");
+                    }
+                    if ui.button("Variables").clicked() {
+                        println!("Open variables panel");
+                    }
+                })
             });
         });
     }
