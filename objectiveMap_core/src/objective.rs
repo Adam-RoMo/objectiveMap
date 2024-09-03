@@ -18,5 +18,5 @@ impl Objective {
             description: description.to_string(),
             state,
         }
-    } 
+    }
 }
