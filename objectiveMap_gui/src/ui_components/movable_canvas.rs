@@ -4,8 +4,6 @@ use crate::ui_components::objective_widget::ObjectiveWidget;
 
 use objective_map_core::{Objective, ObjectiveState};
 
-
-
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
     canvas_items: Vec<ObjectiveWidget>,
@@ -18,8 +16,9 @@ impl MovableCanvas {
             canvas_pos: egui::Vec2::ZERO,
             canvas_items: vec![
                 ObjectiveWidget::new(
-                    Objective::new("This objective", "The description", ObjectiveState::Inaccessible, Vec::new()),
-                    egui::Rect::from_min_size(egui::Pos2::new(50.0, 50.0), egui::Vec2::new(100.0, 100.0))
+                    Objective::new("This objective is longgggg", "The description", ObjectiveState::Inaccessible, Vec::new()),
+                    egui::Pos2::new(50.0, 50.0),
+                    // egui::Rect::from_min_size(egui::Pos2::new(50.0, 50.0), egui::Vec2::new(100.0, 100.0))
                 )
             ],
             dragging: None,

@@ -1,18 +1,30 @@
-use eframe::egui::{self, Rect};
+use eframe::egui;
 use crate::ui_components::colors;
 use objective_map_core::{Objective, ObjectiveState};
 
 
+// const MAX_SIZE: egui::Vec2 = egui::Vec2 {
+//     x: 200.0,
+//     y: 100.0
+// };
+
+const MARGIN: egui::Vec2 = egui::Vec2 {
+    x: 5.0,
+    y: 3.0
+};
+
 pub struct ObjectiveWidget {
     pub objective: Objective,
-    pub rect: egui::Rect,
+    pub pos: egui::Pos2,
+    pub size: Option<egui::Vec2>,
 }
 
 impl ObjectiveWidget {
-    pub fn new(objective: Objective, rect: egui::Rect) -> Self {
+    pub fn new(objective: Objective, pos: egui::Pos2) -> Self {
         Self {
             objective,
-            rect,
+            pos,
+            size: None
         }
     }
 
@@ -26,34 +38,37 @@ impl ObjectiveWidget {
     }
 
     pub fn display(&self, painter: &egui::Painter, canvas_pos: egui::Vec2) {
-        let rect_pos = egui::Rect {
-            min: self.rect.min + canvas_pos,
-            max: self.rect.max + canvas_pos,
+        let text_size: egui::Vec2;
+
+        text_size = match self.size {
+            Some(n) => n,
+            None => painter.layout_no_wrap(self.objective.title.to_string(), egui::FontId::proportional(20.0), egui::Color32::WHITE).size()
         };
-        // Dessiner le fond du widget avec des coins arrondis
+        let rect_pos = egui::Rect {
+            min: self.pos + canvas_pos - (text_size / 2.0) - MARGIN,
+            max: self.pos + canvas_pos + (text_size / 2.0) + MARGIN,
+        };
+        // Fond du widget
         painter.rect_filled(
             rect_pos,
-            egui::Rounding::same(10.0),             // Arrondir les coins
-            self.get_objective_color(&self.objective.state), // Couleur de fond
+            egui::Rounding::same(3.0),
+            self.get_objective_color(&self.objective.state),
         );
 
-        // Dessiner les bordures du cadre
+        // Bodures
         painter.rect_stroke(
             rect_pos,
-            egui::Rounding::same(10.0),             // Arrondir les coins de la bordure
-            egui::Stroke::new(2.0, egui::Color32::BLACK), // Épaisseur et couleur de la bordure
+            egui::Rounding::same(3.0),
+            egui::Stroke::new(2.0, egui::Color32::BLACK),
         );
 
-        // Définir la position du texte (centré dans le cadre)
-        let text_pos = rect_pos.min + egui::Vec2::new(rect_pos.size().x / 2.0 - 50.0, rect_pos.size().y / 2.0 - 10.0);
-
-        // Dessiner le titre de l'objectif au milieu du widget
+        // Text
         painter.text(
-            text_pos,
-            egui::Align2::CENTER_CENTER,      // Centrer le texte dans le cadre
-            &self.objective.title,
-            egui::FontId::proportional(20.0),       // Taille et style de la police
-            egui::Color32::BLACK,                   // Couleur du texte
+            self.pos + canvas_pos,
+            egui::Align2::CENTER_CENTER,
+            self.objective.title.to_string(),
+            egui::FontId::proportional(20.0),
+            egui::Color32::BLACK,
         );
     }
 }
