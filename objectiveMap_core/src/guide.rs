@@ -1,5 +1,5 @@
-use crate::objective::Objective;
-use crate::objective::ObjectiveState;
+use crate::objective::{self, Objective, ObjectiveState, Vec2};
+
 use petgraph::graph::DiGraph;
 use petgraph::graph::NodeIndex;
 
@@ -18,12 +18,13 @@ impl Guide {
         }
     }
 
-    pub fn add_objective(&mut self, title: &str, description: &str, state: ObjectiveState) -> NodeIndex {
+    pub fn add_objective(&mut self, title: &str, description: &str, state: ObjectiveState, position: Vec2) -> NodeIndex {
         let objective = Objective::new(
             title,
             description,
             state,
-            Vec::new()
+            Vec::new(),
+            position
         );
         self.objectives.add_node(objective)
     }
