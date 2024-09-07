@@ -68,7 +68,7 @@ impl ObjectiveWidget {
             egui::Align2::CENTER_CENTER,
             self.objective.title.to_string(),
             egui::FontId::proportional(20.0),
-            egui::Color32::BLACK,
+            colors::TEXT_COLOR,
         );
     }
 }

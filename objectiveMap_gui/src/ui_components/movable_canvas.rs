@@ -17,9 +17,16 @@ impl MovableCanvas {
             canvas_items: vec![
                 ObjectiveWidget::new(
                     Objective::new("This objective is longgggg", "The description", ObjectiveState::Inaccessible, Vec::new()),
-                    egui::Pos2::new(50.0, 50.0),
-                    // egui::Rect::from_min_size(egui::Pos2::new(50.0, 50.0), egui::Vec2::new(100.0, 100.0))
-                )
+                    egui::Pos2::new(100.0, 100.0),
+                ),
+                ObjectiveWidget::new(
+                    Objective::new("This objective is longgggg", "The description", ObjectiveState::Pending, Vec::new()),
+                    egui::Pos2::new(100.0, 150.0),
+                ),
+                ObjectiveWidget::new(
+                    Objective::new("This objective is longgggg", "The description", ObjectiveState::InProgress, Vec::new()),
+                    egui::Pos2::new(100.0, 200.0),
+                ),
             ],
             dragging: None,
         }

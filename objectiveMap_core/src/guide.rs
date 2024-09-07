@@ -18,7 +18,7 @@ impl Guide {
         }
     }
 
-    pub fn addObjective(&mut self, title: &str, description: &str, state: ObjectiveState) -> NodeIndex {
+    pub fn add_objective(&mut self, title: &str, description: &str, state: ObjectiveState) -> NodeIndex {
         let objective = Objective::new(
             title,
             description,
@@ -28,7 +28,7 @@ impl Guide {
         self.objectives.add_node(objective)
     }
 
-    pub fn connectObjectives(&mut self, prerequisite: NodeIndex, dependent: NodeIndex, relation: &str) {
+    pub fn connect_objectives(&mut self, prerequisite: NodeIndex, dependent: NodeIndex, relation: &str) {
         self.objectives.add_edge(prerequisite, dependent, relation.to_string());
     }
 }
