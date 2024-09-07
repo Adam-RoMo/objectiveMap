@@ -12,3 +12,8 @@ pub const BACKGROUND2_COLOR: Color32 = Color32::from_rgb(255, 255, 255);
 pub const SUCCESS_COLOR: Color32 = Color32::from_rgb(50, 205, 50);
 pub const ERROR_COLOR: Color32 = Color32::from_rgb(255, 69, 0);
 pub const WARNING_COLOR: Color32 = Color32::from_rgb(255, 255, 0);
+
+pub const INACCESSIBLE: Color32 = Color32::from_rgb(105, 105, 105);  // Gris foncé
+pub const PENDING: Color32 = Color32::from_rgb(255, 215, 0);        // Jaune
+pub const IN_PROGRESS: Color32 = Color32::from_rgb(30, 144, 255);   // Bleu
+pub const COMPLETE: Color32 = Color32::from_rgb(34, 139, 34);       // Vert

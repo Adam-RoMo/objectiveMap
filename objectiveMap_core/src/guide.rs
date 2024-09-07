@@ -22,7 +22,8 @@ impl Guide {
         let objective = Objective::new(
             title,
             description,
-            state
+            state,
+            Vec::new()
         );
         self.objectives.add_node(objective)
     }

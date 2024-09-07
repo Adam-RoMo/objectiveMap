@@ -1,7 +1,7 @@
 mod ui_components;
 
-use eframe::egui::{self, viewport, Color32, Vec2};
-use ui_components::{MovableCanvas, TopPanel, colors};
+use eframe::egui::{self, viewport, Vec2};
+use ui_components::{MovableCanvas, TopPanel};
 // use objective_map_core::{guide, objective};
 
 

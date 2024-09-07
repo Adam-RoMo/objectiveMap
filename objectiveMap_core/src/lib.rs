@@ -1,3 +1,5 @@
 pub mod guide;
 pub mod objective;
-pub mod tree;
+
+pub use guide::Guide;
+pub use objective::{Objective, ObjectiveState};

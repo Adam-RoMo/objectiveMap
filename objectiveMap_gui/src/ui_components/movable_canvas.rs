@@ -1,14 +1,14 @@
-use eframe::egui::{self};
+use eframe::egui;
 use crate::ui_components::colors;
+use crate::ui_components::objective_widget::ObjectiveWidget;
 
-pub struct CanvasItem {
-    pub rect: egui::Rect,
-    pub color: egui::Color32,
-}
+use objective_map_core::{Objective, ObjectiveState};
+
+
 
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
-    canvas_items: Vec<CanvasItem>,
+    canvas_items: Vec<ObjectiveWidget>,
     dragging: Option<egui::Pos2>,
 }
 
@@ -17,14 +17,10 @@ impl MovableCanvas {
         Self {
             canvas_pos: egui::Vec2::ZERO,
             canvas_items: vec![
-                CanvasItem {
-                    rect: egui::Rect::from_min_size(egui::Pos2::new(50.0, 50.0), egui::Vec2::new(100.0, 100.0)),
-                    color: egui::Color32::from_rgb(200, 100, 100),
-                },
-                CanvasItem {
-                    rect: egui::Rect::from_min_size(egui::Pos2::new(200.0, 150.0), egui::Vec2::new(150.0, 150.0)),
-                    color: egui::Color32::from_rgb(100, 200, 100),
-                },
+                ObjectiveWidget::new(
+                    Objective::new("This objective", "The description", ObjectiveState::Inaccessible, Vec::new()),
+                    egui::Rect::from_min_size(egui::Pos2::new(50.0, 50.0), egui::Vec2::new(100.0, 100.0))
+                )
             ],
             dragging: None,
         }
@@ -45,15 +41,14 @@ impl MovableCanvas {
         } else {
             self.dragging = None;
         }
-
+        dbg!(self.dragging);
         // Dessiner le canvas
         let painter = ui.painter();
         painter.rect_filled(canvas_rect, 0.0, colors::BACKGROUND2_COLOR);
 
         // Dessiner les éléments sur le canvas
-        for item in &self.canvas_items {
-            let item_rect = item.rect.translate(self.canvas_pos);
-            painter.rect_filled(item_rect, 0.0, item.color);
+        for item in &mut self.canvas_items {
+            item.display(painter, self.canvas_pos);
         }
     }
 }
