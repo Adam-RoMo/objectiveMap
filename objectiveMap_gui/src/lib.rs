@@ -17,8 +17,9 @@ struct ObjectiveApp {
 impl Default for ObjectiveApp {
     fn default() -> Self {
         let mut guide = Guide::new("Mon Guide", "C'est un super guide");
-        guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible, Vec2{x: 50.0, y: 50.0});
-        guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress, Vec2{x: 50.0, y: 100.0});
+        let pre = guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible, Vec2{x: 50.0, y: 100.0});
+        let dep = guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress, Vec2{x: 500.0, y: 500.0});
+        guide.connect_objectives(pre, dep, "Test relation");
         Self {
             guide: guide,
             top_panel: TopPanel::new("Mon Panel Top"),
@@ -43,6 +44,7 @@ impl eframe::App for ObjectiveApp {
                     ui.label("Contenu 1");
                     ui.label("Contenu 2");
                     ui.label("Contenu 3");
+                    ui.label("Contenu 4");
                 });            
             });
         });

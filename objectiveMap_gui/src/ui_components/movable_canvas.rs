@@ -14,20 +14,6 @@ impl MovableCanvas {
     pub fn new() -> Self {
         Self {
             canvas_pos: egui::Vec2::ZERO,
-            // canvas_items: vec![
-            //     ObjectiveWidget::new(
-            //         Objective::new("This objective is longgggg", "The description", ObjectiveState::Inaccessible, Vec::new()),
-            //         egui::Pos2::new(100.0, 100.0),
-            //     ),
-            //     ObjectiveWidget::new(
-            //         Objective::new("This objective is longgggg", "The description", ObjectiveState::Pending, Vec::new()),
-            //         egui::Pos2::new(100.0, 150.0),
-            //     ),
-            //     ObjectiveWidget::new(
-            //         Objective::new("This objective is longgggg", "The description", ObjectiveState::InProgress, Vec::new()),
-            //         egui::Pos2::new(100.0, 200.0),
-            //     ),
-            // ],
             dragging: None,
         }
     }
@@ -47,18 +33,21 @@ impl MovableCanvas {
         } else {
             self.dragging = None;
         }
-        dbg!(self.dragging);
         // Dessiner le canvas
         let painter = ui.painter();
         painter.rect_filled(canvas_rect, 0.0, colors::BACKGROUND2_COLOR);
 
-        let objective_drawer: ObjectiveWidget = ObjectiveWidget::new();
+        let objective_widget: ObjectiveWidget = ObjectiveWidget::new();
         // Dessiner les éléments sur le canvas
         for node in guide.objectives.node_indices() {
-            objective_drawer.display(painter, self.canvas_pos, &mut guide.objectives[node])
+            objective_widget.display(painter, self.canvas_pos, &guide.objectives[node])
         }
-        // for guide in guide.objectives {
-        //     item.display(painter, self.canvas_pos);
-        // }
+
+        // Dessiner les edges
+        for edge in guide.objectives.edge_indices() {
+            let (prerequisite, dependent) = guide.objectives.edge_endpoints(edge).unwrap();
+
+            objective_widget.draw_line(painter, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent]);
+        }
     }
 }
