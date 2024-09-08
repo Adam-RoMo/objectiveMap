@@ -1,8 +1,8 @@
 mod ui_components;
 
-use eframe::egui::{self, viewport};
+use eframe::egui::{self, viewport, Margin, Rounding};
 use ui_components::{MovableCanvas, TopPanel};
-use objective_map_core::{objective::Vec2, Guide, Objective, ObjectiveState};
+use objective_map_core::{objective::Vec2, Guide, ObjectiveState};
 
 
 struct ObjectiveApp {
@@ -31,9 +31,13 @@ impl Default for ObjectiveApp {
 
 impl eframe::App for ObjectiveApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        ctx.set_debug_on_hover(true);
         self.top_panel.ui(ctx);
         
-        egui::CentralPanel::default().show(ctx, |ui| {
+        egui::CentralPanel::default().frame(egui::Frame {
+            stroke: egui::Stroke::NONE,
+            ..Default::default()
+        }).show(ctx, |ui| {
             self.guide_canvas.ui(ui, &mut self.guide);
         });
 
@@ -46,6 +50,24 @@ impl eframe::App for ObjectiveApp {
                     ui.label("Contenu 3");
                     ui.label("Contenu 4");
                 });            
+            });
+        });
+
+        egui::TopBottomPanel::top("button_panel").frame(egui::Frame {
+            fill: egui::Color32::TRANSPARENT, // Définit le fond transparent
+            stroke: egui::Stroke::NONE,     // Pas de bordure
+            shadow: egui::Shadow::NONE,
+            inner_margin: Margin::ZERO,
+            outer_margin: Margin::ZERO,
+            rounding: Rounding::ZERO
+        }).max_height(0.0) // Définir une hauteur minimale pour que le panel ne prenne pas d'espace
+        .show(ctx, |ui| {
+            ui.horizontal(|ui| {
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    if ui.button("Bouton").clicked() {
+                        // Action du bouton
+                    }
+                });
             });
         });
     }
