@@ -1,3 +1,5 @@
+use petgraph::graph::NodeIndex;
+
 pub enum ObjectiveState {
     Inaccessible,
     Pending,
@@ -18,6 +20,7 @@ pub struct Objective {
 
     pub pos: Vec2,
     pub size: Option<Vec2>,
+    pub node: NodeIndex
 }
 
 impl Objective {
@@ -29,6 +32,7 @@ impl Objective {
             task_list,
             pos,
             size: None,
+            node: NodeIndex::new(0)
         }
     }
 }

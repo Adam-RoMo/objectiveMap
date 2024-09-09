@@ -9,6 +9,7 @@ struct ObjectiveApp {
     guide: Guide,
     top_panel: TopPanel,
     guide_canvas: MovableCanvas,
+    edit_mode: bool,
     // objectifs_panel: ObjectifsPanel,
     // variables_panel: VariablesPanel,
     // frame_style: egui::Style,
@@ -19,11 +20,12 @@ impl Default for ObjectiveApp {
         let mut guide = Guide::new("Mon Guide", "C'est un super guide");
         let pre = guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible, Vec2{x: 50.0, y: 100.0});
         let dep = guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress, Vec2{x: 500.0, y: 500.0});
-        guide.connect_objectives(pre, dep, "Test relation");
+        // guide.connect_objectives(pre, dep, "Test relation");
         Self {
             guide: guide,
             top_panel: TopPanel::new("Mon Panel Top"),
             guide_canvas: MovableCanvas::new(),
+            edit_mode: false,
             // frame_style: style,
         }
     }
@@ -31,17 +33,16 @@ impl Default for ObjectiveApp {
 
 impl eframe::App for ObjectiveApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        ctx.set_debug_on_hover(true);
         self.top_panel.ui(ctx);
         
         egui::CentralPanel::default().frame(egui::Frame {
             stroke: egui::Stroke::NONE,
             ..Default::default()
         }).show(ctx, |ui| {
-            self.guide_canvas.ui(ui, &mut self.guide);
+            self.guide_canvas.ui(ui, &mut self.guide, self.edit_mode);
         });
 
-        // if 
+        // if  
         egui::SidePanel::right("right_panel").resizable(true).show(ctx, |ui| {
             ui.horizontal_wrapped(|ui| {
                 egui::Frame::group(ui.style()).show(ui, |ui| {
@@ -53,19 +54,12 @@ impl eframe::App for ObjectiveApp {
             });
         });
 
-        egui::TopBottomPanel::top("button_panel").frame(egui::Frame {
-            fill: egui::Color32::TRANSPARENT, // Définit le fond transparent
-            stroke: egui::Stroke::NONE,     // Pas de bordure
-            shadow: egui::Shadow::NONE,
-            inner_margin: Margin::ZERO,
-            outer_margin: Margin::ZERO,
-            rounding: Rounding::ZERO
-        }).max_height(0.0) // Définir une hauteur minimale pour que le panel ne prenne pas d'espace
+        egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none()) // Définir une hauteur minimale pour que le panel ne prenne pas d'espace
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                    if ui.button("Bouton").clicked() {
-                        // Action du bouton
+                    if ui.button("Edit Mode").clicked() {
+                        self.edit_mode = !self.edit_mode;
                     }
                 });
             });

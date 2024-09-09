@@ -2,7 +2,7 @@ use eframe::egui;
 use crate::ui_components::colors;
 use crate::ui_components::objective_widget::ObjectiveWidget;
 
-use objective_map_core::{Guide, Objective, ObjectiveState};
+use objective_map_core::{self, Guide, Objective, ObjectiveState};
 
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
@@ -18,7 +18,7 @@ impl MovableCanvas {
         }
     }
 
-    pub fn ui(&mut self, ui: &mut egui::Ui, guide: &mut Guide) {
+    pub fn ui(&mut self, ui: &mut egui::Ui, guide: &mut Guide, edit_mode: bool) {
         // let available_rect = ui.available_rect_before_wrap();
         let canvas_rect = egui::Rect::EVERYTHING;
         let response = ui.allocate_rect(canvas_rect, egui::Sense::drag());
@@ -38,16 +38,50 @@ impl MovableCanvas {
         painter.rect_filled(canvas_rect, 0.0, colors::BACKGROUND2_COLOR);
 
         let objective_widget: ObjectiveWidget = ObjectiveWidget::new();
+        let node_indices: Vec<_> = guide.objectives.node_indices().collect();
+
         // Dessiner les éléments sur le canvas
-        for node in guide.objectives.node_indices() {
-            objective_widget.display(painter, self.canvas_pos, &guide.objectives[node])
+        for node in node_indices {
+            objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
         }
 
         // Dessiner les edges
         for edge in guide.objectives.edge_indices() {
             let (prerequisite, dependent) = guide.objectives.edge_endpoints(edge).unwrap();
 
-            objective_widget.draw_line(painter, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent]);
+            objective_widget.draw_line(ui, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent]);
         }
+
+        if let Some(mouse_pos) = ui.input(|i| i.pointer.hover_pos()) {
+            match guide.selected_objectives.dependent {
+                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node], mouse_pos, true),
+                None => ()
+            }
+            match guide.selected_objectives.prerequisite {
+                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node], mouse_pos, false),
+                None => ()
+            }
+        }
+        
+
+        let node_indices: Vec<_> = guide.objectives.node_indices().collect();
+        // edit mode
+        if edit_mode {
+            for node in node_indices {
+                objective_widget.draw_edit_tools(ui, self.canvas_pos, &mut guide.objectives[node],
+                    || {
+                        guide.selected_objectives.dependent = Some(node);
+                    },
+                    || {
+                        println!("Sup objective")
+                    },
+                    || {
+                        guide.selected_objectives.prerequisite = Some(node);
+                    }
+                );
+            }
+            guide.auto_connect();
+        }
+
     }
 }

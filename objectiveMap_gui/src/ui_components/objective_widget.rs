@@ -1,7 +1,7 @@
-use eframe::{egui::{self, Pos2, Vec2}, epaint::{color, CubicBezierShape}};
-use crate::ui_components::colors;
+use eframe::{egui::{self, Pos2, Vec2}, epaint::{color, CubicBezierShape}, glow::BOOL};
+use crate::ui_components::{colors, CircleButton};
+
 use objective_map_core::{Objective, ObjectiveState};
-use eframe::epaint::{PathShape, QuadraticBezierShape};
 
 
 
@@ -16,7 +16,7 @@ const MARGIN: egui::Vec2 = egui::Vec2 {
 };
 
 pub struct ObjectiveWidget {
-    // pub objective: Objective,
+// pub objective: Objective,
     // pub pos: egui::Pos2,
     // pub size: Option<egui::Vec2>,
 }
@@ -66,7 +66,39 @@ impl ObjectiveWidget {
         (control1, control2)
     }
 
-    pub fn draw_line(&self, painter: &egui::Painter, canvas_pos: egui::Vec2, prerequisite: &Objective, dependent: &Objective) {
+    pub fn draw_line_to_pos(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective, mouse_pos: egui::Pos2, top: bool) {
+        let painter = ui.painter();
+        let objective_text_size = self.get_text_size(painter, objective);
+        let objective_rect_pos = self.get_rect_pos(objective, canvas_pos, objective_text_size);
+        let pre_point: egui::Pos2;
+
+        if top {
+            pre_point = egui::Pos2 {
+                x: objective_rect_pos.min.x + objective_rect_pos.size().x / 2.0,
+                y: objective_rect_pos.min.y
+            };
+        } else {
+            pre_point = egui::Pos2 {
+                x: objective_rect_pos.min.x + objective_rect_pos.size().x / 2.0,
+                y: objective_rect_pos.max.y
+            };
+
+        }
+        let (mid_point1, mid_point2) = self.calculate_bezier_control_points(pre_point, mouse_pos);
+        let points = [
+            pre_point,
+            mid_point1,
+            mid_point2,
+            mouse_pos
+        ];
+
+        let stroke = egui::Stroke::new(3.0, egui::Color32::from_black_alpha(200)); // Ajuste la couleur selon tes besoins
+        let path = CubicBezierShape::from_points_stroke(points, false, egui::Color32::TRANSPARENT, stroke);
+        painter.add(path);
+    }
+
+    pub fn draw_line(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, prerequisite: &Objective, dependent: &Objective) {
+        let painter = ui.painter();
         let pre_text_size = self.get_text_size(painter, prerequisite);
         let dep_text_size = self.get_text_size(painter, dependent);
         let pre_rect_pos = self.get_rect_pos(prerequisite, canvas_pos, pre_text_size);
@@ -94,7 +126,33 @@ impl ObjectiveWidget {
 
     }
 
-    pub fn display(&self, painter: &egui::Painter, canvas_pos: egui::Vec2, objective: &Objective) {
+    pub fn draw_edit_tools<F1, F2, F3>(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective, on_click1: F1, on_click2: F2, on_click3: F3)
+    where
+        F1: FnOnce(),
+        F2: FnOnce(),
+        F3: FnOnce(),
+    {
+        let text_size = self.get_text_size(ui.painter(), objective);
+        let rect_pos = self.get_rect_pos(objective, canvas_pos, text_size);
+
+
+        let mut top_middle_button = CircleButton::new(egui::Pos2::new(rect_pos.min.x + rect_pos.size().x / 2.0, rect_pos.min.y), 5.0, colors::ERROR_COLOR);
+        let mut top_right_button = CircleButton::new(egui::Pos2::new(rect_pos.max.x, rect_pos.min.y), 5.0, colors::ERROR_COLOR);
+        let mut bottom_middle_button = CircleButton::new(egui::Pos2::new(rect_pos.min.x + rect_pos.size().x / 2.0, rect_pos.max.y), 5.0, colors::ERROR_COLOR);
+
+        top_middle_button.ui(ui, || {
+            on_click1();
+        });
+        top_right_button.ui(ui, || {
+            on_click2();
+        });
+        bottom_middle_button.ui(ui, || {
+            on_click3();
+        });
+    }
+
+    pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective) {
+        let painter = ui.painter();
         let text_size = self.get_text_size(painter, objective);
 
         let rect_pos = self.get_rect_pos(objective, canvas_pos, text_size);
