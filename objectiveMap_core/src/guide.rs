@@ -1,6 +1,8 @@
 use crate::objective::{Objective, ObjectiveState, Vec2};
 
+use petgraph::adj::Neighbors;
 use petgraph::graph::DiGraph;
+use petgraph::graph::Node;
 use petgraph::graph::NodeIndex;
 
 
@@ -30,7 +32,8 @@ pub struct Guide {
     pub title: String,
     pub description: String,
     pub objectives: DiGraph<Objective, String>,
-    pub selected_objectives: SelectedObjectives
+    pub selected_objectives: SelectedObjectives,
+    pub selected_objective: Option<NodeIndex>
 }
 
 impl Guide {
@@ -42,7 +45,8 @@ impl Guide {
             selected_objectives: SelectedObjectives {
                 prerequisite: None,
                 dependent: None
-            }
+            },
+            selected_objective: None
         }
     }
 
@@ -61,6 +65,7 @@ impl Guide {
 
     pub fn connect_objectives(&mut self, prerequisite: NodeIndex, dependent: NodeIndex, relation: &str) {
         self.objectives.add_edge(prerequisite, dependent, relation.to_string());
+        self.check_childs_status(prerequisite);
     }
 
     pub fn remove_node(&mut self, node: NodeIndex) {
@@ -80,12 +85,48 @@ impl Guide {
             }
             None => ()
         }
+        self.objectives[node].state = ObjectiveState::Inaccessible;
+        let neighbors: Vec<NodeIndex> = self.objectives
+            .neighbors_directed(node, petgraph::Direction::Outgoing)
+            .collect();
         self.objectives.remove_node(node);
+        for neighbor in neighbors {
+            self.check_childs_status(neighbor);
+        }
     }
 
     pub fn remove_connection(&mut self, prerequisite: NodeIndex, dependent: NodeIndex) {
         if let Some(edge) = self.objectives.find_edge(prerequisite, dependent) {
             self.objectives.remove_edge(edge);
+            self.check_childs_status(prerequisite);
+            self.check_childs_status(dependent);
+        }
+    }
+
+    pub fn check_childs_status(&mut self, node: NodeIndex) {
+        let neighbors: Vec<NodeIndex> = self.objectives
+            .neighbors_directed(node, petgraph::Direction::Incoming)
+            .collect();
+        if neighbors.is_empty() && self.objectives[node].state != ObjectiveState::Complete
+            && self.objectives[node].state != ObjectiveState::InProgress {
+            self.objectives[node].state = ObjectiveState::Pending;
+            return;
+        }
+        let neighbors: Vec<NodeIndex> = self.objectives
+            .neighbors_directed(node, petgraph::Direction::Outgoing)
+            .collect();
+        for neighbor in neighbors {
+            if self.objectives[neighbor].state == ObjectiveState::Pending &&
+                (self.objectives[node].state == ObjectiveState::InProgress
+                    || self.objectives[node].state == ObjectiveState::Inaccessible
+                    || self.objectives[node].state == ObjectiveState::Pending
+                ) {
+                self.objectives[neighbor].state = ObjectiveState::Inaccessible;
+            }
+            if self.objectives[node].state == ObjectiveState::Complete
+                && self.objectives[neighbor].state == ObjectiveState::Inaccessible {
+                self.objectives[neighbor].state = ObjectiveState::Pending;
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 use petgraph::graph::NodeIndex;
 
+#[derive(Debug, PartialEq)]
 pub enum ObjectiveState {
     Inaccessible,
     Pending,

@@ -40,7 +40,7 @@ impl TopPanel {
                     if ui.button("Nouvel objectif").clicked() {
                         println!("New objective");
 
-                        guide.add_objective("Nouvel objectif", "Description de l'objectif", ObjectiveState::Inaccessible);
+                        guide.add_objective("Nouvel objectif", "Description de l'objectif", ObjectiveState::Pending);
                     }
                 })
             });

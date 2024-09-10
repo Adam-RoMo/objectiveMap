@@ -2,7 +2,7 @@ mod ui_components;
 
 use eframe::egui::{self, viewport, Margin, Rounding};
 use ui_components::{MovableCanvas, TopPanel};
-use objective_map_core::{objective::Vec2, Guide, ObjectiveState};
+use objective_map_core::{objective::{self, Vec2}, Guide, ObjectiveState};
 
 
 struct ObjectiveApp {
@@ -18,7 +18,7 @@ struct ObjectiveApp {
 impl Default for ObjectiveApp {
     fn default() -> Self {
         let mut guide = Guide::new("Mon Guide", "C'est un super guide");
-        // guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible);
+        guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress);
         // guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress);
         Self {
             guide: guide,
@@ -51,6 +51,38 @@ impl eframe::App for ObjectiveApp {
                     ui.label("Contenu 4");
                 });          
             });
+        });
+
+        egui::Window::new("Détails de l'objectif")
+        .resizable(true)
+        .show(ctx, |ui| {
+            ui.label("Détails de l'objectif");
+            match self.guide.selected_objective {
+                Some(node) => {
+                    ui.label(&self.guide.objectives[node].title);
+                    ui.label(&self.guide.objectives[node].description);
+                    ui.group(|ui| {
+                        for item in &self.guide.objectives[node].task_list {
+                            ui.label(item);
+                        }
+                    });
+                    if self.guide.objectives[node].state == ObjectiveState::Pending {
+                        if ui.button("Commencer").clicked() {
+                            self.guide.objectives[node].state = ObjectiveState::InProgress;
+                        }
+                    }
+                    if self.guide.objectives[node].state == ObjectiveState::InProgress {
+                        if ui.button("Stopper").clicked() {
+                            self.guide.objectives[node].state = ObjectiveState::Pending;
+                        }    
+                        if ui.button("Valider").clicked() {
+                            self.guide.objectives[node].state = ObjectiveState::Complete;
+                            self.guide.check_childs_status(node);
+                        }    
+                    }
+                }
+                None => ()
+            }
         });
 
         egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none())

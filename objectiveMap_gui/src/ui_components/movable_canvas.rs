@@ -19,10 +19,10 @@ impl MovableCanvas {
     }
 
     pub fn ui(&mut self, ui: &mut egui::Ui, guide: &mut Guide, edit_mode: bool) {
-        // let available_rect = 
         let canvas_rect = ui.available_rect_before_wrap();
         let response = ui.allocate_rect(canvas_rect, egui::Sense::drag());
         
+        // Déplacemer la carte
         if response.dragged() {
             if let Some(mouse_pos) = response.interact_pointer_pos() {
                 if let Some(prev_drag_pos) = self.dragging {
@@ -51,7 +51,8 @@ impl MovableCanvas {
                 })
             }
             let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
-            let response = ui.allocate_rect(rect, egui::Sense::drag());
+            let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
+            // let response_click = ui.allocate_rect(rect, egui::Sense::click_and_drag());
 
             // Si l'objectif est en train d'être déplacé
             if response.dragged() {
@@ -62,11 +63,16 @@ impl MovableCanvas {
                     });
                 }
             }
+
+            // Si l'objectif est clické
+            if response.clicked() {
+                guide.selected_objective = Some(node);
+            }
         }
 
+        // Dessiner les edges
         let mut edges_to_remove = Vec::new();
 
-        // Dessiner les edges
         for edge in guide.objectives.edge_indices() {
             let (prerequisite, dependent) = guide.objectives.edge_endpoints(edge).unwrap();
 
@@ -76,10 +82,12 @@ impl MovableCanvas {
             });
         }
 
+        // Remove connection
         for (prerequisite, dependent) in edges_to_remove {
             guide.remove_connection(prerequisite, dependent);
         }
 
+        // Draw line to mouse
         if let Some(mouse_pos) = ui.input(|i| i.pointer.hover_pos()) {
             match guide.selected_objectives.dependent {
                 Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node], mouse_pos, true),
@@ -91,10 +99,10 @@ impl MovableCanvas {
             }
         }
 
+        // edit mode
         let node_indices: Vec<_> = guide.objectives.node_indices().collect();
         let mut nodes_to_remove = Vec::new();
 
-        // edit mode
         if edit_mode {
             for node in node_indices {
                 objective_widget.draw_edit_tools(ui, self.canvas_pos, &mut guide.objectives[node],
@@ -103,7 +111,6 @@ impl MovableCanvas {
                     },
                     |objective| {
                         nodes_to_remove.push(objective.node);
-                        // guide.remove_node(objective.node);
                     },
                     || {
                         guide.selected_objectives.prerequisite = Some(node);
@@ -111,10 +118,10 @@ impl MovableCanvas {
                 );
             }
             guide.auto_connect();
+
             for node in nodes_to_remove {
                 guide.remove_node(node);
             }
         }
-
     }
 }
