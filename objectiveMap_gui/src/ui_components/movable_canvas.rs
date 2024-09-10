@@ -45,11 +45,21 @@ impl MovableCanvas {
             objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
         }
 
+
+        let mut edges_to_remove = Vec::new();
+
         // Dessiner les edges
         for edge in guide.objectives.edge_indices() {
             let (prerequisite, dependent) = guide.objectives.edge_endpoints(edge).unwrap();
 
-            objective_widget.draw_line(ui, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent]);
+            objective_widget.draw_line(ui, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent],
+            |prerequisite, dependent| {
+                edges_to_remove.push((prerequisite.node, dependent.node));
+            });
+        }
+
+        for (prerequisite, dependent) in edges_to_remove {
+            guide.remove_connection(prerequisite, dependent);
         }
 
         if let Some(mouse_pos) = ui.input(|i| i.pointer.hover_pos()) {
@@ -62,9 +72,10 @@ impl MovableCanvas {
                 None => ()
             }
         }
-        
 
         let node_indices: Vec<_> = guide.objectives.node_indices().collect();
+        let mut nodes_to_remove = Vec::new();
+
         // edit mode
         if edit_mode {
             for node in node_indices {
@@ -72,8 +83,9 @@ impl MovableCanvas {
                     || {
                         guide.selected_objectives.dependent = Some(node);
                     },
-                    || {
-                        println!("Sup objective")
+                    |objective| {
+                        nodes_to_remove.push(objective.node);
+                        // guide.remove_node(objective.node);
                     },
                     || {
                         guide.selected_objectives.prerequisite = Some(node);
@@ -81,6 +93,9 @@ impl MovableCanvas {
                 );
             }
             guide.auto_connect();
+            for node in nodes_to_remove {
+                guide.remove_node(node);
+            }
         }
 
     }

@@ -97,7 +97,10 @@ impl ObjectiveWidget {
         painter.add(path);
     }
 
-    pub fn draw_line(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, prerequisite: &Objective, dependent: &Objective) {
+    pub fn draw_line<F>(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, prerequisite: &Objective, dependent: &Objective, on_click: F)
+    where
+        F: FnOnce(&Objective, &Objective),
+    {
         let painter = ui.painter();
         let pre_text_size = self.get_text_size(painter, prerequisite);
         let dep_text_size = self.get_text_size(painter, dependent);
@@ -123,13 +126,19 @@ impl ObjectiveWidget {
         let stroke = egui::Stroke::new(3.0, egui::Color32::from_black_alpha(200)); // Ajuste la couleur selon tes besoins
         let path = CubicBezierShape::from_points_stroke(points, false, egui::Color32::TRANSPARENT, stroke);
         painter.add(path);
+        
+        let mut button = CircleButton::new(egui::Pos2::new((pre_point.x + dep_point.x) / 2.0, (pre_point.y + dep_point.y) / 2.0), 5.0, colors::ERROR_COLOR);
+
+        button.ui(ui, || {
+            on_click(prerequisite, dependent);
+        });
 
     }
 
     pub fn draw_edit_tools<F1, F2, F3>(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective, on_click1: F1, on_click2: F2, on_click3: F3)
     where
         F1: FnOnce(),
-        F2: FnOnce(),
+        F2: FnOnce(&Objective),
         F3: FnOnce(),
     {
         let text_size = self.get_text_size(ui.painter(), objective);
@@ -144,7 +153,7 @@ impl ObjectiveWidget {
             on_click1();
         });
         top_right_button.ui(ui, || {
-            on_click2();
+            on_click2(objective);
         });
         bottom_middle_button.ui(ui, || {
             on_click3();

@@ -65,6 +65,32 @@ impl Guide {
         self.objectives.add_edge(prerequisite, dependent, relation.to_string());
     }
 
+    pub fn remove_node(&mut self, node: NodeIndex) {
+        match self.selected_objectives.dependent {
+            Some(dep) => {
+                if node == dep {
+                    self.selected_objectives.dependent = None
+                }
+            }
+            None => ()
+        }
+        match self.selected_objectives.prerequisite {
+            Some(dep) => {
+                if node == dep {
+                    self.selected_objectives.prerequisite = None
+                }
+            }
+            None => ()
+        }
+        self.objectives.remove_node(node);
+    }
+
+    pub fn remove_connection(&mut self, prerequisite: NodeIndex, dependent: NodeIndex) {
+        if let Some(edge) = self.objectives.find_edge(prerequisite, dependent) {
+            self.objectives.remove_edge(edge);
+        }
+    }
+
     pub fn auto_connect(&mut self) {
         match self.selected_objectives.is_full() {
             Some((prerequisite, dependent)) => {
