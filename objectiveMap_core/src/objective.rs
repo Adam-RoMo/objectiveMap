@@ -12,19 +12,27 @@ pub struct Vec2{
     pub y: f32,
 }
 
+impl Copy for Vec2 {}
+
+impl Clone for Vec2 {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
 pub struct Objective {
     pub title: String,
     pub description: String,
     pub state: ObjectiveState,
     pub task_list: Vec<String>,
 
-    pub pos: Vec2,
+    pub pos: Option<Vec2>,
     pub size: Option<Vec2>,
     pub node: NodeIndex
 }
 
 impl Objective {
-    pub fn new(title: &str, description: &str, state: ObjectiveState, task_list: Vec<String>, pos: Vec2) -> Self {
+    pub fn new(title: &str, description: &str, state: ObjectiveState, task_list: Vec<String>, pos: Option<Vec2>) -> Self {
         Objective {
             title: title.to_string(),
             description: description.to_string(),

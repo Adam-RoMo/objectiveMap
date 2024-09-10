@@ -2,7 +2,7 @@ use eframe::egui;
 use crate::ui_components::colors;
 use crate::ui_components::objective_widget::ObjectiveWidget;
 
-use objective_map_core::{self, Guide, Objective, ObjectiveState};
+use objective_map_core::{self, objective::Vec2, Guide, Objective, ObjectiveState};
 
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
@@ -19,10 +19,10 @@ impl MovableCanvas {
     }
 
     pub fn ui(&mut self, ui: &mut egui::Ui, guide: &mut Guide, edit_mode: bool) {
-        // let available_rect = ui.available_rect_before_wrap();
-        let canvas_rect = egui::Rect::EVERYTHING;
+        // let available_rect = 
+        let canvas_rect = ui.available_rect_before_wrap();
         let response = ui.allocate_rect(canvas_rect, egui::Sense::drag());
-
+        
         if response.dragged() {
             if let Some(mouse_pos) = response.interact_pointer_pos() {
                 if let Some(prev_drag_pos) = self.dragging {
@@ -33,6 +33,7 @@ impl MovableCanvas {
         } else {
             self.dragging = None;
         }
+        
         // Dessiner le canvas
         let painter = ui.painter();
         painter.rect_filled(canvas_rect, 0.0, colors::BACKGROUND2_COLOR);
@@ -42,9 +43,26 @@ impl MovableCanvas {
 
         // Dessiner les éléments sur le canvas
         for node in node_indices {
-            objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
-        }
+            if guide.objectives[node].pos.is_none() {
+                let canvas_size = canvas_rect.size();
+                guide.objectives[node].pos = Some(Vec2{
+                    x: canvas_size.x / 2.0 - self.canvas_pos.x,
+                    y: canvas_size.y / 2.0 - self.canvas_pos.y
+                })
+            }
+            let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
+            let response = ui.allocate_rect(rect, egui::Sense::drag());
 
+            // Si l'objectif est en train d'être déplacé
+            if response.dragged() {
+                if let Some(mouse_pos) = response.interact_pointer_pos() {
+                    guide.objectives[node].pos = Some(Vec2 {
+                        x: mouse_pos.x - self.canvas_pos.x,
+                        y: mouse_pos.y - self.canvas_pos.y
+                    });
+                }
+            }
+        }
 
         let mut edges_to_remove = Vec::new();
 

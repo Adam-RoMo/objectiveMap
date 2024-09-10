@@ -1,6 +1,4 @@
-use std::ptr::null;
-
-use crate::objective::{self, Objective, ObjectiveState, Vec2};
+use crate::objective::{Objective, ObjectiveState, Vec2};
 
 use petgraph::graph::DiGraph;
 use petgraph::graph::NodeIndex;
@@ -48,13 +46,13 @@ impl Guide {
         }
     }
 
-    pub fn add_objective(&mut self, title: &str, description: &str, state: ObjectiveState, position: Vec2) -> NodeIndex {
+    pub fn add_objective(&mut self, title: &str, description: &str, state: ObjectiveState) -> NodeIndex {
         let objective = Objective::new(
             title,
             description,
             state,
             Vec::new(),
-            position
+            None,
         );
         let node = self.objectives.add_node(objective);
         self.objectives[node].node = node;

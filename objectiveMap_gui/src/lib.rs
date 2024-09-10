@@ -18,9 +18,8 @@ struct ObjectiveApp {
 impl Default for ObjectiveApp {
     fn default() -> Self {
         let mut guide = Guide::new("Mon Guide", "C'est un super guide");
-        let pre = guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible, Vec2{x: 50.0, y: 100.0});
-        let dep = guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress, Vec2{x: 500.0, y: 500.0});
-        // guide.connect_objectives(pre, dep, "Test relation");
+        // guide.add_objective("Premier Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::Inaccessible);
+        // guide.add_objective("Deuxième Objectif", "Une superbe description pour un superbe objectif", ObjectiveState::InProgress);
         Self {
             guide: guide,
             top_panel: TopPanel::new("Mon Panel Top"),
@@ -33,7 +32,7 @@ impl Default for ObjectiveApp {
 
 impl eframe::App for ObjectiveApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.top_panel.ui(ctx);
+        self.top_panel.ui(ctx, &mut self.guide);
         
         egui::CentralPanel::default().frame(egui::Frame {
             stroke: egui::Stroke::NONE,
@@ -50,11 +49,11 @@ impl eframe::App for ObjectiveApp {
                     ui.label("Contenu 2");
                     ui.label("Contenu 3");
                     ui.label("Contenu 4");
-                });            
+                });          
             });
         });
 
-        egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none()) // Définir une hauteur minimale pour que le panel ne prenne pas d'espace
+        egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none())
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {

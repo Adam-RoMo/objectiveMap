@@ -1,7 +1,7 @@
-use eframe::{egui::{self, Pos2, Vec2}, epaint::{color, CubicBezierShape}, glow::BOOL};
+use eframe::{egui::{self, Pos2}, epaint::{color, CubicBezierShape}, glow::BOOL};
 use crate::ui_components::{colors, CircleButton};
 
-use objective_map_core::{Objective, ObjectiveState};
+use objective_map_core::{objective::Vec2, Objective, ObjectiveState};
 
 
 
@@ -50,9 +50,16 @@ impl ObjectiveWidget {
     }
 
     fn get_rect_pos(&self, objective: &Objective, canvas_pos: egui::Vec2, text_size: egui::Vec2) -> egui::Rect {
+        let pos_objective = match objective.pos {
+            Some(pos) => pos,
+            None => Vec2 {
+                x: 0.0,
+                y: 0.0
+            }
+        };
         let rect_pos = egui::Rect {
-            min: egui::Pos2::new(objective.pos.x, objective.pos.y) + canvas_pos - (text_size / 2.0) - MARGIN,
-            max: egui::Pos2::new(objective.pos.x, objective.pos.y) + canvas_pos + (text_size / 2.0) + MARGIN,
+            min: egui::Pos2::new(pos_objective.x, pos_objective.y) + canvas_pos - (text_size / 2.0) - MARGIN,
+            max: egui::Pos2::new(pos_objective.x, pos_objective.y) + canvas_pos + (text_size / 2.0) + MARGIN,
         };
 
         rect_pos
@@ -160,10 +167,10 @@ impl ObjectiveWidget {
         });
     }
 
-    pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective) {
+    pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective) ->  egui::Rect{
         let painter = ui.painter();
         let text_size = self.get_text_size(painter, objective);
-
+        
         let rect_pos = self.get_rect_pos(objective, canvas_pos, text_size);
         // Fond du widget
         painter.rect_filled(
@@ -178,14 +185,22 @@ impl ObjectiveWidget {
             egui::Rounding::same(3.0),
             egui::Stroke::new(2.0, egui::Color32::BLACK),
         );
+        let pos_objective = match objective.pos {
+            Some(pos) => pos,
+            None => Vec2 {
+                x: 0.0,
+                y: 0.0
+            }
+        };
 
         // Text
         painter.text(
-            egui::Pos2::new(objective.pos.x, objective.pos.y) + canvas_pos,
+            egui::Pos2::new(pos_objective.x, pos_objective.y) + canvas_pos,
             egui::Align2::CENTER_CENTER,
             objective.title.to_string(),
             egui::FontId::proportional(20.0),
             colors::TEXT_COLOR,
         );
+        rect_pos
     }
 }

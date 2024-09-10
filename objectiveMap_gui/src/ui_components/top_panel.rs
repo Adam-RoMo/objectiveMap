@@ -1,4 +1,5 @@
 use eframe::egui::{self};
+use objective_map_core::{self, Guide, Objective, ObjectiveState};
 // use crate::ui_components::colors;
 
 
@@ -13,7 +14,7 @@ impl TopPanel {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context) {
+    pub fn ui(&mut self, ctx: &egui::Context, guide: &mut Guide) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label(&self.title);
@@ -35,6 +36,11 @@ impl TopPanel {
                     }
                     if ui.button("Variables").clicked() {
                         println!("Open variables panel");
+                    }
+                    if ui.button("Nouvel objectif").clicked() {
+                        println!("New objective");
+
+                        guide.add_objective("Nouvel objectif", "Description de l'objectif", ObjectiveState::Inaccessible);
                     }
                 })
             });
