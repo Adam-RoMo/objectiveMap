@@ -1,7 +1,7 @@
 mod ui_components;
 
 use eframe::egui::{self, viewport, Margin, Rounding};
-use ui_components::{MovableCanvas, TopPanel};
+use ui_components::{MovableCanvas, TopPanel, ObjectiveInfoWindow};
 use objective_map_core::{objective::{self, Vec2}, Guide, ObjectiveState};
 
 
@@ -9,6 +9,7 @@ struct ObjectiveApp {
     guide: Guide,
     top_panel: TopPanel,
     guide_canvas: MovableCanvas,
+    objective_info: ObjectiveInfoWindow,
     edit_mode: bool,
     // objectifs_panel: ObjectifsPanel,
     // variables_panel: VariablesPanel,
@@ -24,6 +25,7 @@ impl Default for ObjectiveApp {
             guide: guide,
             top_panel: TopPanel::new("Mon Panel Top"),
             guide_canvas: MovableCanvas::new(),
+            objective_info: ObjectiveInfoWindow::new(),
             edit_mode: false,
             // frame_style: style,
         }
@@ -53,37 +55,44 @@ impl eframe::App for ObjectiveApp {
             });
         });
 
-        egui::Window::new("Détails de l'objectif")
-        .resizable(true)
-        .show(ctx, |ui| {
-            ui.label("Détails de l'objectif");
-            match self.guide.selected_objective {
-                Some(node) => {
-                    ui.label(&self.guide.objectives[node].title);
-                    ui.label(&self.guide.objectives[node].description);
-                    ui.group(|ui| {
-                        for item in &self.guide.objectives[node].task_list {
-                            ui.label(item);
-                        }
-                    });
-                    if self.guide.objectives[node].state == ObjectiveState::Pending {
-                        if ui.button("Commencer").clicked() {
-                            self.guide.objectives[node].state = ObjectiveState::InProgress;
-                        }
-                    }
-                    if self.guide.objectives[node].state == ObjectiveState::InProgress {
-                        if ui.button("Stopper").clicked() {
-                            self.guide.objectives[node].state = ObjectiveState::Pending;
-                        }    
-                        if ui.button("Valider").clicked() {
-                            self.guide.objectives[node].state = ObjectiveState::Complete;
-                            self.guide.check_childs_status(node);
-                        }    
-                    }
-                }
-                None => ()
-            }
-        });
+        self.objective_info.ui(ctx, &mut self.guide);
+        // egui::Window::new("Détails de l'objectif")
+        // .resizable(true)
+        // .show(ctx, |ui| {
+        //     ui.label("Détails de l'objectif");
+        //     match self.guide.selected_objective {
+        //         Some(node) => {
+        //             ui.label(&self.guide.objectives[node].title);
+        //             ui.label(&self.guide.objectives[node].description);
+        //             ui.group(|ui| {
+        //                 for item in &self.guide.objectives[node].task_list {
+        //                     ui.label(item);
+        //                 }
+        //             });
+        //             if self.guide.objectives[node].state == ObjectiveState::Pending {
+        //                 if ui.button("Commencer").clicked() {
+        //                     self.guide.objectives[node].state = ObjectiveState::InProgress;
+        //                 }
+        //             }
+
+        //             if self.guide.objectives[node].state == ObjectiveState::Pending {
+        //                 if ui.button("Commencer").clicked() {
+        //                     self.guide.objectives[node].state = ObjectiveState::InProgress;
+        //                 }
+        //             }
+        //             if self.guide.objectives[node].state == ObjectiveState::InProgress {
+        //                 if ui.button("Stopper").clicked() {
+        //                     self.guide.objectives[node].state = ObjectiveState::Pending;
+        //                 }    
+        //                 if ui.button("Valider").clicked() {
+        //                     self.guide.objectives[node].state = ObjectiveState::Complete;
+        //                     self.guide.check_childs_status(node);
+        //                 }    
+        //             }
+        //         }
+        //         None => ()
+        //     }
+        // });
 
         egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none())
         .show(ctx, |ui| {
