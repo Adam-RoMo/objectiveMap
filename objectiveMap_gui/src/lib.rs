@@ -1,7 +1,7 @@
 mod ui_components;
 
 use eframe::egui::{self, viewport, Margin, Rounding};
-use ui_components::{MovableCanvas, TopPanel, ObjectiveInfoWindow};
+use ui_components::{MovableCanvas, TopPanel, ObjectiveInfoWindow, ObjectivesPanel};
 use objective_map_core::{objective::{self, Vec2}, Guide, ObjectiveState};
 
 
@@ -10,8 +10,8 @@ struct ObjectiveApp {
     top_panel: TopPanel,
     guide_canvas: MovableCanvas,
     objective_info: ObjectiveInfoWindow,
+    objectives_panel: ObjectivesPanel,
     edit_mode: bool,
-    // objectifs_panel: ObjectifsPanel,
     // variables_panel: VariablesPanel,
     // frame_style: egui::Style,
 }
@@ -26,6 +26,7 @@ impl Default for ObjectiveApp {
             top_panel: TopPanel::new("Mon Panel Top"),
             guide_canvas: MovableCanvas::new(),
             objective_info: ObjectiveInfoWindow::new(),
+            objectives_panel: ObjectivesPanel::new(),
             edit_mode: false,
             // frame_style: style,
         }
@@ -44,55 +45,19 @@ impl eframe::App for ObjectiveApp {
         });
 
         // if  
-        egui::SidePanel::right("right_panel").resizable(true).show(ctx, |ui| {
-            ui.horizontal_wrapped(|ui| {
-                egui::Frame::group(ui.style()).show(ui, |ui| {
-                    ui.label("Contenu 1");
-                    ui.label("Contenu 2");
-                    ui.label("Contenu 3");
-                    ui.label("Contenu 4");
-                });          
-            });
-        });
+        self.objectives_panel.ui(ctx, &mut self.guide);
+        // egui::SidePanel::right("right_panel").resizable(true).show(ctx, |ui| {
+        //     ui.horizontal_wrapped(|ui| {
+        //         egui::Frame::group(ui.style()).show(ui, |ui| {
+        //             ui.label("Contenu 1");
+        //             ui.label("Contenu 2");
+        //             ui.label("Contenu 3");
+        //             ui.label("Contenu 4");
+        //         });          
+        //     });
+        // });
 
         self.objective_info.ui(ctx, &mut self.guide);
-        // egui::Window::new("Détails de l'objectif")
-        // .resizable(true)
-        // .show(ctx, |ui| {
-        //     ui.label("Détails de l'objectif");
-        //     match self.guide.selected_objective {
-        //         Some(node) => {
-        //             ui.label(&self.guide.objectives[node].title);
-        //             ui.label(&self.guide.objectives[node].description);
-        //             ui.group(|ui| {
-        //                 for item in &self.guide.objectives[node].task_list {
-        //                     ui.label(item);
-        //                 }
-        //             });
-        //             if self.guide.objectives[node].state == ObjectiveState::Pending {
-        //                 if ui.button("Commencer").clicked() {
-        //                     self.guide.objectives[node].state = ObjectiveState::InProgress;
-        //                 }
-        //             }
-
-        //             if self.guide.objectives[node].state == ObjectiveState::Pending {
-        //                 if ui.button("Commencer").clicked() {
-        //                     self.guide.objectives[node].state = ObjectiveState::InProgress;
-        //                 }
-        //             }
-        //             if self.guide.objectives[node].state == ObjectiveState::InProgress {
-        //                 if ui.button("Stopper").clicked() {
-        //                     self.guide.objectives[node].state = ObjectiveState::Pending;
-        //                 }    
-        //                 if ui.button("Valider").clicked() {
-        //                     self.guide.objectives[node].state = ObjectiveState::Complete;
-        //                     self.guide.check_childs_status(node);
-        //                 }    
-        //             }
-        //         }
-        //         None => ()
-        //     }
-        // });
 
         egui::TopBottomPanel::top("button_panel").frame(egui::Frame::none())
         .show(ctx, |ui| {
