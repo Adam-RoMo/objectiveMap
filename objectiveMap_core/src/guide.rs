@@ -1,4 +1,4 @@
-use crate::objective::{Objective, ObjectiveState, Vec2};
+use crate::objective::{Objective, ObjectiveState, Vec2, Variable};
 
 use petgraph::adj::Neighbors;
 use petgraph::graph::DiGraph;
@@ -33,7 +33,8 @@ pub struct Guide {
     pub description: String,
     pub objectives: DiGraph<Objective, String>,
     pub selected_objectives: SelectedObjectives,
-    pub selected_objective: Option<NodeIndex>
+    pub selected_objective: Option<NodeIndex>,
+    pub variables: Vec<Variable>
 }
 
 impl Guide {
@@ -46,7 +47,8 @@ impl Guide {
                 prerequisite: None,
                 dependent: None
             },
-            selected_objective: None
+            selected_objective: None,
+            variables: Vec::new()
         }
     }
 

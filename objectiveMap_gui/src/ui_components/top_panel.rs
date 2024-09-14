@@ -1,5 +1,7 @@
 use eframe::egui::{self};
 use objective_map_core::{self, Guide, Objective, ObjectiveState};
+
+use crate::PanelStatus;
 // use crate::ui_components::colors;
 
 
@@ -14,7 +16,7 @@ impl TopPanel {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context, guide: &mut Guide) {
+    pub fn ui(&mut self, ctx: &egui::Context, guide: &mut Guide, panel_status: &mut PanelStatus) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label(&self.title);
@@ -32,9 +34,18 @@ impl TopPanel {
                         // for guide in guides {}
                     });
                     if ui.button("Mes objectifs").clicked() {
-                        println!("Open objectifs panel");
+                        *panel_status = match *panel_status {
+                            PanelStatus::OBJECTIVES => PanelStatus::NONE,
+                            PanelStatus::VARIABLES => PanelStatus::OBJECTIVES,
+                            PanelStatus::NONE => PanelStatus::OBJECTIVES
+                        };
                     }
                     if ui.button("Variables").clicked() {
+                        *panel_status = match *panel_status {
+                            PanelStatus::OBJECTIVES => PanelStatus::VARIABLES,
+                            PanelStatus::VARIABLES => PanelStatus::NONE,
+                            PanelStatus::NONE => PanelStatus::VARIABLES
+                        };
                         println!("Open variables panel");
                     }
                     if ui.button("Nouvel objectif").clicked() {

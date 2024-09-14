@@ -2,7 +2,7 @@ use eframe::egui;
 use crate::ui_components::colors;
 use crate::ui_components::objective_widget::ObjectiveWidget;
 
-use objective_map_core::{self, objective::Vec2, Guide, Objective, ObjectiveState};
+use objective_map_core::{self, objective::Vec2, Guide};
 
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
