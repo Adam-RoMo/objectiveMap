@@ -5,10 +5,9 @@ use petgraph::graph::NodeIndex;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::io::Write;
+use std::io::Read;
 use rfd::FileDialog;
-
-
-
+use serde_json;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct SerializableNodeIndex(usize);
@@ -210,7 +209,6 @@ impl Guide {
                 .map(|p| p.to_string_lossy().into_owned()) {
                 *file_path = Some(path);
             } else {
-                // Annuler si l'utilisateur annule le dialogue
                 return;
             }
         }
@@ -218,10 +216,8 @@ impl Guide {
         if let Some(ref path) = *file_path {
             match File::create(path) {
                 Ok(mut file) => {
-                    // Sérialiser le guide en chaîne JSON
                     match serde_json::to_string(guide) {
                         Ok(serialized) => {
-                            // Écrire la chaîne JSON dans le fichier
                             if let Err(err) = file.write_all(serialized.as_bytes()) {
                                 eprintln!("Erreur lors de l'écriture dans le fichier : {}", err);
                             }
@@ -237,6 +233,39 @@ impl Guide {
             }
         } else {
             eprintln!("Le chemin du fichier est introuvable.");
+        }
+    }
+
+    pub fn load_guide() -> Option<Guide> {
+        if let Some(path) = FileDialog::new()
+            .set_title("Ouvrir un guide")
+            .pick_file()
+            .map(|p| p.to_string_lossy().into_owned()) {
+            
+            // Lire le fichier
+            match File::open(&path) {
+                Ok(mut file) => {
+                    let mut contents = String::new();
+                    if let Err(err) = file.read_to_string(&mut contents) {
+                        eprintln!("Erreur lors de la lecture du fichier : {}", err);
+                        return None;
+                    }
+    
+                    match serde_json::from_str(&contents) {
+                        Ok(guide) => Some(guide),
+                        Err(err) => {
+                            eprintln!("Erreur de désérialisation : {}", err);
+                            None
+                        }
+                    }
+                },
+                Err(err) => {
+                    eprintln!("Erreur lors de l'ouverture du fichier : {}", err);
+                    None
+                }
+            }
+        } else {
+            None
         }
     }
 }

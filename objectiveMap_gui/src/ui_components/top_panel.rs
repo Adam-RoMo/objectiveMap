@@ -25,10 +25,12 @@ impl TopPanel {
                 egui::menu::bar(ui, |ui| {
                     ui.menu_button("Guides", |ui| {
                         if ui.button("Nouveau guide").clicked() {
-                            println!("New Guide");
+                            // *guide = Guide::new(title, description);
                         }
                         if ui.button("Importer un guide").clicked() {
-                            println!("Charger un Guide");
+                            if let Some(new_guide) = Guide::load_guide() {
+                                *guide = new_guide;
+                            }
                         }
                         if ui.button("Exporter un guide").clicked() {
                             Guide::export_guide(&guide);
