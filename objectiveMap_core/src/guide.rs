@@ -1,19 +1,45 @@
-use crate::objective::{Objective, ObjectiveState, Vec2, Variable};
+use crate::objective::{Objective, ObjectiveState, Variable};
 
-use petgraph::adj::Neighbors;
 use petgraph::graph::DiGraph;
-use petgraph::graph::Node;
 use petgraph::graph::NodeIndex;
+use serde::{Deserialize, Serialize};
+use std::fs::File;
+use std::io::Write;
+use rfd::FileDialog;
 
 
 
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub struct SerializableNodeIndex(usize);
+
+impl SerializableNodeIndex {
+    // Méthode pour obtenir un NodeIndex à partir de SerializableNodeIndex
+    pub fn to_node_index(&self) -> NodeIndex {
+        NodeIndex::new(self.0)
+    }
+}
+
+impl From<NodeIndex> for SerializableNodeIndex {
+    fn from(index: NodeIndex) -> Self {
+        SerializableNodeIndex(index.index())
+    }
+}
+
+impl From<SerializableNodeIndex> for NodeIndex {
+    fn from(sni: SerializableNodeIndex) -> Self {
+        NodeIndex::new(sni.0)
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SelectedObjectives {
-    pub prerequisite: Option<NodeIndex>,
-    pub dependent: Option<NodeIndex>
+    pub prerequisite: Option<SerializableNodeIndex>,
+    pub dependent: Option<SerializableNodeIndex>
 }
 
 impl SelectedObjectives {
-    pub fn is_full(&self) -> Option<(NodeIndex, NodeIndex)>{
+    pub fn is_full(&self) -> Option<(SerializableNodeIndex, SerializableNodeIndex)>{
         match self.prerequisite {
             None => None,
             Some(pre) => match self.dependent {
@@ -28,12 +54,14 @@ impl SelectedObjectives {
         self.dependent = None;
     }
 }
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Guide {
     pub title: String,
     pub description: String,
     pub objectives: DiGraph<Objective, String>,
     pub selected_objectives: SelectedObjectives,
-    pub selected_objective: Option<NodeIndex>,
+    pub selected_objective: Option<SerializableNodeIndex>,
     pub variables: Vec<Variable>
 }
 
@@ -61,7 +89,7 @@ impl Guide {
             None,
         );
         let node = self.objectives.add_node(objective);
-        self.objectives[node].node = node;
+        self.objectives[node].node = SerializableNodeIndex::from(node);
         node
     }
 
@@ -73,7 +101,7 @@ impl Guide {
     pub fn remove_node(&mut self, node: NodeIndex) {
         match self.selected_objectives.dependent {
             Some(dep) => {
-                if node == dep {
+                if node == NodeIndex::from(dep) {
                     self.selected_objectives.dependent = None
                 }
             }
@@ -81,7 +109,7 @@ impl Guide {
         }
         match self.selected_objectives.prerequisite {
             Some(dep) => {
-                if node == dep {
+                if node == NodeIndex::from(dep) {
                     self.selected_objectives.prerequisite = None
                 }
             }
@@ -135,11 +163,80 @@ impl Guide {
     pub fn auto_connect(&mut self) {
         match self.selected_objectives.is_full() {
             Some((prerequisite, dependent)) => {
-                self.connect_objectives(prerequisite, dependent, "relation");
+                self.connect_objectives(NodeIndex::from(prerequisite), NodeIndex::from(dependent), "relation");
                 self.selected_objectives.dependent = None;
                 self.selected_objectives.prerequisite = None;
             },
             None => (),
+        }
+    }
+
+    pub fn export_guide(guide: &Guide) {
+        // Sérialiser le guide
+        let serialized = match serde_json::to_string(guide) {
+            Ok(serialized) => serialized,
+            Err(err) => {
+                eprintln!("Erreur de sérialisation : {}", err);
+                return;
+            }
+        };
+    
+        // Sélectionner un fichier
+        if let Some(file_path) = FileDialog::new()
+            .set_title("Enregistrer le guide")
+            .save_file()
+            .map(|path| path.to_string_lossy().into_owned()) {
+            
+            // Créer le fichier
+            let mut file = match File::create(&file_path) {
+                Ok(file) => file,
+                Err(err) => {
+                    eprintln!("Erreur lors de la création du fichier : {}", err);
+                    return;
+                }
+            };
+            // Écrire dans le fichier
+            if let Err(err) = file.write_all(serialized.as_bytes()) {
+                eprintln!("Erreur lors de l'écriture dans le fichier : {}", err);
+            }
+        }
+    }
+
+    pub fn save_guide(guide: &Guide, mut file_path: &mut Option<String>) {
+        if file_path.is_none() {
+            if let Some(path) = FileDialog::new()
+                .set_title("Enregistrer le guide")
+                .save_file()
+                .map(|p| p.to_string_lossy().into_owned()) {
+                *file_path = Some(path);
+            } else {
+                // Annuler si l'utilisateur annule le dialogue
+                return;
+            }
+        }
+
+        if let Some(ref path) = *file_path {
+            match File::create(path) {
+                Ok(mut file) => {
+                    // Sérialiser le guide en chaîne JSON
+                    match serde_json::to_string(guide) {
+                        Ok(serialized) => {
+                            // Écrire la chaîne JSON dans le fichier
+                            if let Err(err) = file.write_all(serialized.as_bytes()) {
+                                eprintln!("Erreur lors de l'écriture dans le fichier : {}", err);
+                            }
+                        },
+                        Err(err) => {
+                            eprintln!("Erreur de sérialisation : {}", err);
+                        }
+                    }
+                },
+                Err(err) => {
+                    eprintln!("Erreur lors de la création du fichier : {}", err);
+                }
+            }
+        } else {
+            eprintln!("Le chemin du fichier est introuvable.");
         }
     }
 }

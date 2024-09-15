@@ -1,5 +1,5 @@
 use eframe::egui::{self};
-use objective_map_core::{Guide, Objective, ObjectiveState};
+use objective_map_core::{Guide, Objective, ObjectiveState, SerializableNodeIndex};
 
 
 pub struct ObjectivesPanel {
@@ -48,7 +48,7 @@ impl ObjectivesPanel {
                     ui.horizontal(|ui| {
                         ui.label(&guide.objectives[node].title);
                         if ui.button("Voir").clicked() {
-                            guide.selected_objective = Some(node);
+                            guide.selected_objective = Some(SerializableNodeIndex::from(node));
                             // println!("Objectif sélectionné : {}", guide.objectives[node].title);
                         }
                     });

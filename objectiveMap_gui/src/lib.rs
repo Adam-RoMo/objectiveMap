@@ -1,8 +1,11 @@
 mod ui_components;
 
-use eframe::{egui::{self, viewport, Margin, Rounding}, glow::OBJECT_TYPE};
+use std::fs::File;
+
+use eframe::egui::{self, viewport};
 use ui_components::{MovableCanvas, TopPanel, ObjectiveInfoWindow, ObjectivesPanel, VariablesPanel};
-use objective_map_core::{objective::{self, Vec2}, Guide, ObjectiveState};
+use objective_map_core::{Guide, ObjectiveState};
+
 
 
 enum PanelStatus {
@@ -19,7 +22,8 @@ struct ObjectiveApp {
     objectives_panel: ObjectivesPanel,
     variables_panel: VariablesPanel,
     edit_mode: bool,
-    panel_mode: PanelStatus
+    panel_mode: PanelStatus,
+    file_path: Option<String>
     // frame_style: egui::Style,
 }
 
@@ -36,7 +40,8 @@ impl Default for ObjectiveApp {
             objectives_panel: ObjectivesPanel::new(),
             variables_panel: VariablesPanel::new(),
             edit_mode: false,
-            panel_mode: PanelStatus::NONE
+            panel_mode: PanelStatus::NONE,
+            file_path: None
             // frame_style: style,
         }
     }
@@ -44,7 +49,7 @@ impl Default for ObjectiveApp {
 
 impl eframe::App for ObjectiveApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        self.top_panel.ui(ctx, &mut self.guide, &mut self.panel_mode);
+        self.top_panel.ui(ctx, &mut self.guide, &mut self.panel_mode, &mut self.file_path);
         
         egui::CentralPanel::default().frame(egui::Frame {
             stroke: egui::Stroke::NONE,

@@ -2,7 +2,7 @@ use eframe::egui;
 use crate::ui_components::colors;
 use crate::ui_components::objective_widget::ObjectiveWidget;
 
-use objective_map_core::{self, objective::Vec2, Guide};
+use objective_map_core::{self, objective::Vec2, Guide, SerializableNodeIndex};
 
 pub struct MovableCanvas {
     canvas_pos: egui::Vec2,
@@ -66,7 +66,7 @@ impl MovableCanvas {
 
             // Si l'objectif est clické
             if response.clicked() {
-                guide.selected_objective = Some(node);
+                guide.selected_objective = Some(SerializableNodeIndex::from(node));
             }
         }
 
@@ -84,17 +84,17 @@ impl MovableCanvas {
 
         // Remove connection
         for (prerequisite, dependent) in edges_to_remove {
-            guide.remove_connection(prerequisite, dependent);
+            guide.remove_connection(prerequisite.to_node_index(), dependent.to_node_index());
         }
 
         // Draw line to mouse
         if let Some(mouse_pos) = ui.input(|i| i.pointer.hover_pos()) {
             match guide.selected_objectives.dependent {
-                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node], mouse_pos, true),
+                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node.to_node_index()], mouse_pos, true),
                 None => ()
             }
             match guide.selected_objectives.prerequisite {
-                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node], mouse_pos, false),
+                Some(node) => objective_widget.draw_line_to_pos(ui, self.canvas_pos, &guide.objectives[node.to_node_index()], mouse_pos, false),
                 None => ()
             }
         }
@@ -107,20 +107,20 @@ impl MovableCanvas {
             for node in node_indices {
                 objective_widget.draw_edit_tools(ui, self.canvas_pos, &mut guide.objectives[node],
                     || {
-                        guide.selected_objectives.dependent = Some(node);
+                        guide.selected_objectives.dependent = Some(SerializableNodeIndex::from(node));
                     },
                     |objective| {
                         nodes_to_remove.push(objective.node);
                     },
                     || {
-                        guide.selected_objectives.prerequisite = Some(node);
+                        guide.selected_objectives.prerequisite = Some(SerializableNodeIndex::from(node));
                     }
                 );
             }
             guide.auto_connect();
 
             for node in nodes_to_remove {
-                guide.remove_node(node);
+                guide.remove_node(node.to_node_index());
             }
         }
     }

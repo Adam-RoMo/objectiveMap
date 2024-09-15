@@ -1,13 +1,15 @@
 use eframe::egui::{self};
-use objective_map_core::{self, Guide, Objective, ObjectiveState};
-
+use objective_map_core::{self, Guide, ObjectiveState};
 use crate::PanelStatus;
+use std::fs::File;
+
 // use crate::ui_components::colors;
 
 
 pub struct TopPanel {
     pub title: String,
 }
+
 
 impl TopPanel {
     pub fn new(title: &str) -> Self {
@@ -16,7 +18,7 @@ impl TopPanel {
         }
     }
 
-    pub fn ui(&mut self, ctx: &egui::Context, guide: &mut Guide, panel_status: &mut PanelStatus) {
+    pub fn ui(&mut self, ctx: &egui::Context, guide: &mut Guide, panel_status: &mut PanelStatus, file_path: &mut Option<String>) {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             ui.horizontal(|ui| {
                 ui.label(&self.title);
@@ -26,12 +28,14 @@ impl TopPanel {
                             println!("New Guide");
                         }
                         if ui.button("Importer un guide").clicked() {
-                            println!("Import a guide");
+                            println!("Charger un Guide");
                         }
                         if ui.button("Exporter un guide").clicked() {
-                            println!("Export a guide");
+                            Guide::export_guide(&guide);
                         }
-                        // for guide in guides {}
+                        if ui.button("Sauvegarder").clicked() {
+                            Guide::save_guide(guide, file_path);
+                        }
                     });
                     if ui.button("Mes objectifs").clicked() {
                         *panel_status = match *panel_status {

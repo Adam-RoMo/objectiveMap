@@ -1,6 +1,9 @@
 use petgraph::graph::NodeIndex;
+use crate::guide::SerializableNodeIndex;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialEq)]
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum ObjectiveState {
     Inaccessible,
     Pending,
@@ -8,6 +11,7 @@ pub enum ObjectiveState {
     Complete,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Variable {
     pub name: String,
     pub value: u32
@@ -22,6 +26,7 @@ impl Variable {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Vec2{
     pub x: f32,
     pub y: f32,
@@ -44,6 +49,7 @@ impl Clone for Vec2 {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Objective {
     pub title: String,
     pub description: String,
@@ -53,7 +59,7 @@ pub struct Objective {
 
     pub pos: Option<Vec2>,
     pub size: Option<Vec2>,
-    pub node: NodeIndex,
+    pub node: SerializableNodeIndex,
 }
 
 impl Objective {
@@ -66,7 +72,7 @@ impl Objective {
             variable_requirements,
             pos,
             size: None,
-            node: NodeIndex::new(0)
+            node: SerializableNodeIndex::from(NodeIndex::new(0))
         }
     }
 }
