@@ -13,7 +13,7 @@ pub const SUCCESS_COLOR: Color32 = Color32::from_rgb(50, 205, 50);
 pub const ERROR_COLOR: Color32 = Color32::from_rgb(255, 69, 0);
 pub const WARNING_COLOR: Color32 = Color32::from_rgb(255, 255, 0);
 
-pub const INACCESSIBLE: Color32 = Color32::from_rgb(255, 255, 255);  // Gris foncé
+pub const INACCESSIBLE: Color32 = Color32::from_rgb(186, 186, 186);  // Gris foncé
 pub const PENDING: Color32 = Color32::from_rgb(239, 221, 60);        // Jaune
 pub const IN_PROGRESS: Color32 = Color32::from_rgb(121, 173, 233);   // Bleu
 pub const COMPLETE: Color32 = Color32::from_rgb(72, 202, 101);       // Vert

@@ -7,6 +7,9 @@ use crate::PanelStatus;
 
 pub struct TopPanel {
     pub title: String,
+    pub new_guide: bool,
+    pub buf_title: String,
+    pub buf_description: String,
 }
 
 
@@ -14,6 +17,9 @@ impl TopPanel {
     pub fn new(title: &str) -> Self {
         Self {
             title: title.to_string(),
+            new_guide: false,
+            buf_title: String::new(),
+            buf_description: String::new()
         }
     }
 
@@ -24,20 +30,9 @@ impl TopPanel {
                 egui::menu::bar(ui, |ui| {
                     ui.menu_button("Guides", |ui| {
                         if ui.button("Nouveau guide").clicked() {
-                            let mut new_title = String::new();
-                            let mut new_description = String::new();
-
-                            Window::new("Nouveau Guide").show(ctx, |ui| {
-                                ui.label("Nom du guide:");
-                                ui.text_edit_singleline(&mut new_title);
-                                
-                                ui.label("Description du guide:");
-                                ui.text_edit_multiline(&mut new_description);
-                                if ui.button("Valider").clicked() {
-                                    *guide = Guide::new(&new_title, &new_description);
-                                    ctx.request_repaint();
-                                }
-                            });
+                            self.new_guide = true;
+                            self.buf_title = String::new();
+                            self.buf_description = String::new();
                         }
                         if ui.button("Importer un guide").clicked() {
                             if let Some(new_guide) = Guide::load_guide() {
@@ -74,5 +69,19 @@ impl TopPanel {
                 })
             });
         });
+        if self.new_guide {
+            Window::new("Nouveau Guide").show(ctx, |ui| {
+                ui.label("Nom du guide:");
+                ui.text_edit_singleline(&mut self.buf_title);
+                
+                ui.label("Description du guide:");
+                ui.text_edit_multiline(&mut self.buf_description);
+                if ui.button("Valider").clicked() {
+                    *guide = Guide::new(&self.buf_title, &self.buf_description);
+                    ctx.request_repaint();
+                    self.new_guide = false;
+                }
+            });
+        }
     }
 }

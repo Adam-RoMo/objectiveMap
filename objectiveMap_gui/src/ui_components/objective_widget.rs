@@ -15,6 +15,7 @@ const MARGIN: egui::Vec2 = egui::Vec2 {
     y: 3.0
 };
 
+#[derive(Clone)]
 pub struct ObjectiveWidget {
 // pub objective: Objective,
     // pub pos: egui::Pos2,
@@ -104,7 +105,7 @@ impl ObjectiveWidget {
         painter.add(path);
     }
 
-    pub fn draw_line<F>(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, prerequisite: &Objective, dependent: &Objective, on_click: F)
+    pub fn draw_line<F>(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, prerequisite: &Objective, edit_mode: bool, dependent: &Objective, on_click: F)
     where
         F: FnOnce(&Objective, &Objective),
     {
@@ -134,11 +135,13 @@ impl ObjectiveWidget {
         let path = CubicBezierShape::from_points_stroke(points, false, egui::Color32::TRANSPARENT, stroke);
         painter.add(path);
         
-        let mut button = CircleButton::new(egui::Pos2::new((pre_point.x + dep_point.x) / 2.0, (pre_point.y + dep_point.y) / 2.0), 5.0, colors::ERROR_COLOR);
-
-        button.ui(ui, || {
-            on_click(prerequisite, dependent);
-        });
+        if edit_mode {
+            let mut button = CircleButton::new(egui::Pos2::new((pre_point.x + dep_point.x) / 2.0, (pre_point.y + dep_point.y) / 2.0), 5.0, colors::ERROR_COLOR);
+    
+            button.ui(ui, || {
+                on_click(prerequisite, dependent);
+            });
+        }
 
     }
 
@@ -166,6 +169,26 @@ impl ObjectiveWidget {
             on_click3();
         });
     }
+
+    pub fn draw_triangles(self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective) {
+        let text_size = self.get_text_size(ui.painter(), objective);
+        let rect_pos = self.get_rect_pos(objective, canvas_pos, text_size);
+        let mid_pos = egui::Pos2::new(rect_pos.min.x + rect_pos.size().x / 2.0, rect_pos.max.y);
+
+        let point1 = egui::Pos2::new(mid_pos.x - 5.0, mid_pos.y - 1.0);
+        let point2 = egui::Pos2::new(mid_pos.x + 5.0, mid_pos.y - 1.0);
+        let point3 = egui::Pos2::new(mid_pos.x, mid_pos.y + 10.0);
+
+        let triangle = egui::Shape::convex_polygon(
+            vec![point1, point2, point3],
+            self.get_objective_color(&objective.state),
+            egui::Stroke::NONE
+        );
+
+        // let triangle = egui::Shape::closed_line(vec![point1, point2, point3], egui::Stroke::new(1.0, ));
+        ui.painter().add(triangle);
+    }
+
 
     pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective, selected: bool) ->  egui::Rect{
         let painter = ui.painter();

@@ -50,13 +50,12 @@ impl MovableCanvas {
                     y: canvas_size.y / 2.0 - self.canvas_pos.y
                 })
             }
-            let isSelected = match guide.selected_objective {
-                Some(selectedNode) => selectedNode.to_node_index() == node,
+            let is_selected = match guide.selected_objective {
+                Some(selected_node) => selected_node.to_node_index() == node,
                 None => false
             };
-            let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node], isSelected);
+            let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node], is_selected);
             let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
-            // let response_click = ui.allocate_rect(rect, egui::Sense::click_and_drag());
 
             // Si l'objectif est en train d'être déplacé
             if response.dragged() {
@@ -80,7 +79,7 @@ impl MovableCanvas {
         for edge in guide.objectives.edge_indices() {
             let (prerequisite, dependent) = guide.objectives.edge_endpoints(edge).unwrap();
 
-            objective_widget.draw_line(ui, self.canvas_pos, &guide.objectives[prerequisite], &guide.objectives[dependent],
+            objective_widget.draw_line(ui, self.canvas_pos, &guide.objectives[prerequisite], edit_mode, &guide.objectives[dependent],
             |prerequisite, dependent| {
                 edges_to_remove.push((prerequisite.node, dependent.node));
             });
@@ -126,6 +125,11 @@ impl MovableCanvas {
             for node in nodes_to_remove {
                 guide.remove_node(node.to_node_index());
             }
+        }
+        let node_indices: Vec<_> = guide.objectives.node_indices().collect();
+        for node in node_indices {
+            let objective_widget_clone = objective_widget.clone();
+            objective_widget_clone.draw_triangles(ui, self.canvas_pos, &guide.objectives[node]);
         }
     }
 }
