@@ -1,7 +1,6 @@
-use eframe::egui::{self};
+use eframe::egui::{self, Window};
 use objective_map_core::{self, Guide, ObjectiveState};
 use crate::PanelStatus;
-use std::fs::File;
 
 // use crate::ui_components::colors;
 
@@ -25,7 +24,20 @@ impl TopPanel {
                 egui::menu::bar(ui, |ui| {
                     ui.menu_button("Guides", |ui| {
                         if ui.button("Nouveau guide").clicked() {
-                            // *guide = Guide::new(title, description);
+                            let mut new_title = String::new();
+                            let mut new_description = String::new();
+
+                            Window::new("Nouveau Guide").show(ctx, |ui| {
+                                ui.label("Nom du guide:");
+                                ui.text_edit_singleline(&mut new_title);
+                                
+                                ui.label("Description du guide:");
+                                ui.text_edit_multiline(&mut new_description);
+                                if ui.button("Valider").clicked() {
+                                    *guide = Guide::new(&new_title, &new_description);
+                                    ctx.request_repaint();
+                                }
+                            });
                         }
                         if ui.button("Importer un guide").clicked() {
                             if let Some(new_guide) = Guide::load_guide() {

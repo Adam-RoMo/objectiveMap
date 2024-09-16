@@ -50,7 +50,11 @@ impl MovableCanvas {
                     y: canvas_size.y / 2.0 - self.canvas_pos.y
                 })
             }
-            let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node]);
+            let isSelected = match guide.selected_objective {
+                Some(selectedNode) => selectedNode.to_node_index() == node,
+                None => false
+            };
+            let rect = objective_widget.display(ui, self.canvas_pos, &guide.objectives[node], isSelected);
             let response = ui.allocate_rect(rect, egui::Sense::click_and_drag());
             // let response_click = ui.allocate_rect(rect, egui::Sense::click_and_drag());
 

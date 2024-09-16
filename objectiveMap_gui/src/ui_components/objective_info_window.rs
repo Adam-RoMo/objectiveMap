@@ -40,7 +40,7 @@ impl ObjectiveInfoWindow {
                                 let mut bool = false;
     
                                 if let Some(index) = guide.variables.iter().position(|x| x.name == variable.name) {
-                                    bool = guide.variables[index].value <= variable.value;
+                                    bool = guide.variables[index].value >= variable.value;
                                     ui.add_enabled(false, |ui: &mut egui::Ui| {
                                         ui.checkbox(&mut bool, variable.name.to_string())
                                     });

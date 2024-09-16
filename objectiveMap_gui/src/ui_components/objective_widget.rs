@@ -167,23 +167,27 @@ impl ObjectiveWidget {
         });
     }
 
-    pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective) ->  egui::Rect{
+    pub fn display(&self, ui: &mut egui::Ui, canvas_pos: egui::Vec2, objective: &Objective, selected: bool) ->  egui::Rect{
         let painter = ui.painter();
         let text_size = self.get_text_size(painter, objective);
         
         let rect_pos = self.get_rect_pos(objective, canvas_pos, text_size);
+        let mut color = self.get_objective_color(&objective.state);
         // Fond du widget
         painter.rect_filled(
             rect_pos,
             egui::Rounding::same(3.0),
-            self.get_objective_color(&objective.state),
+            color,
         );
 
+        if selected {
+            color = colors::TEXT2_COLOR;
+        }
         // Bodures
         painter.rect_stroke(
             rect_pos,
             egui::Rounding::same(3.0),
-            egui::Stroke::new(2.0, egui::Color32::BLACK),
+            egui::Stroke::new(2.0, color),
         );
         let pos_objective = match objective.pos {
             Some(pos) => pos,
