@@ -154,7 +154,20 @@ impl Guide {
             }
             if self.objectives[node].state == ObjectiveState::Complete
                 && self.objectives[neighbor].state == ObjectiveState::Inaccessible {
-                self.objectives[neighbor].state = ObjectiveState::Pending;
+                let mut accessible = true;
+                let parents: Vec<NodeIndex> = self.objectives
+                    .neighbors_directed(neighbor, petgraph::Direction::Incoming)
+                    .collect();
+                for parent in parents {
+                    if self.objectives[parent].state != ObjectiveState::Complete {
+                        accessible = false;
+                    }
+                }
+                if accessible {
+                    self.objectives[neighbor].state = ObjectiveState::Pending;
+                } else {
+                    self.objectives[neighbor].state = ObjectiveState::Inaccessible;
+                }
             }
         }
     }
