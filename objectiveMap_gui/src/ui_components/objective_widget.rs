@@ -1,9 +1,7 @@
-use eframe::{egui::{self, Pos2}, epaint::{color, CubicBezierShape}, glow::BOOL};
+use eframe::{egui::{self}, epaint::CubicBezierShape};
 use crate::ui_components::{colors, CircleButton};
 
 use objective_map_core::{objective::Vec2, Objective, ObjectiveState};
-
-
 
 // const MAX_SIZE: egui::Vec2 = egui::Vec2 {
 //     x: 200.0,

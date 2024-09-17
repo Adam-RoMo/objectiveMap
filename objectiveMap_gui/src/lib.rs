@@ -1,7 +1,5 @@
 mod ui_components;
 
-use std::fs::File;
-
 use eframe::egui::{self, viewport};
 use ui_components::{MovableCanvas, TopPanel, ObjectiveInfoWindow, ObjectivesPanel, VariablesPanel};
 use objective_map_core::{Guide, ObjectiveState};
